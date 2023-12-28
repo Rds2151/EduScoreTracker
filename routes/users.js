@@ -51,7 +51,6 @@ router.get("/dashboard", async (req, res, next) => {
             } else {
                 throw sessionDetail;
             }
-            console.log(tests.topTwoScores)
             res.render("index", { "user": user, "session": sessionDetail.session , "testsData": tests.topTwoScores });
         } else {
             let fetchData = await fetchTest(user._id);

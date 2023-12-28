@@ -197,7 +197,7 @@ class Server {
             if (!tests || tests.length === 0) {
                 throw new Error("Tests not found");
             }
-
+            console.log(tests)
             return tests;
         } catch (error) {
             throw error;
