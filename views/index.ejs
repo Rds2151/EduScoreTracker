@@ -58,7 +58,7 @@
                                 <nav class="sb-sidenav-menu-nested nav">
                                     <% if ( user.userType === 'teacher' ) { %>
                                         <a class="nav-link" onclick="showForm('sessionForm')">Create Session</a>
-                                        <a class="nav-link" onclick="showForm('sessionForm')">View Result</a>
+                                        <a class="nav-link" onclick="showForm('viewForm')">View Result</a>
                                     <% } else { %>
                                         <a class="nav-link" href="">View Result</a>
                                     <% } %>
@@ -170,10 +170,10 @@
                         <div class="container mt-5" id="mainForm">
                             <ul class="nav nav-tabs" id="testTabs" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="createTest-tab" data-toggle="tab" href="#createTest" role="tab" aria-controls="createTest" aria-selected="true">Create Test</a>
+                                    <a class="nav-link active" id="createTest-tab" data-bs-toggle="tab" href="#createTest" role="tab" aria-controls="createTest" aria-selected="true">Create Test</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="sessionDetails-tab" data-toggle="tab" href="#sessionDetails" role="tab" aria-controls="sessionDetails" aria-selected="false">Session Details</a>
+                                    <a class="nav-link" id="sessionDetails-tab" data-bs-toggle="tab" href="#sessionDetails" role="tab" aria-controls="sessionDetails" aria-selected="false">Session Details</a>
                                 </li>
                             </ul>
                         
@@ -186,11 +186,10 @@
                                         </div>
                                         <div class="card-body">
                                             <!-- Your test creation form goes here -->
-                                            <form id="testForm">
                                                 <div class="form-group">
                                                     <label for="sessionSelect">Select Session:</label>
-                                                    <% if (typeof session !== 'undefined' && session.length > 0) {%>
-                                                        <select class="form-control" id="sessionSelect">
+                                                    <% if (typeof session !== 'undefined' && session.length > 0) { %>
+                                                        <select class="form-control" id="sessionSelect" required>
                                                             <% for (s of session) { %>
                                                                 <option value="<%= s._id %>"><%= s.sessionName %></option>
                                                             <% } %>
@@ -199,16 +198,36 @@
                                                         Session not Found
                                                     <% } %>
                                                 </div>
-                                                
+                                        
                                                 <div class="form-group">
                                                     <label for="testName">Test Name:</label>
-                                                    <input type="text" class="form-control" id="testName" placeholder="Enter test name">
+                                                    <input type="text" class="form-control" id="testName" placeholder="Enter test name" required>
                                                 </div>
+                                        
+                                                <div class="form-group">
+                                                    <label for="question">Question:</label>
+                                                    <input type="text" class="form-control" id="question" placeholder="Enter the question">
+                                                </div>
+                                        
+                                                <div class="form-group">
+                                                    <label for="options">Options (comma-separated):</label>
+                                                    <input type="text" class="form-control" id="options" placeholder="Option 1, Option 2, Option 3, Option 4">
+                                                </div>
+                                        
+                                                <div class="form-group">
+                                                    <label for="correctAnswer">Correct Answer:</label>
+                                                    <select class="form-control" id="correctAnswer">
+                                                        <option value="Option 1">Option 1</option>
+                                                        <option value="Option 2">Option 2</option>
+                                                        <option value="Option 3">Option 3</option>
+                                                        <option value="Option 4">Option 4</option>
+                                                    </select>
+                                                </div>
+                                
                                                 <button type="button" class="btn btn-primary" onclick="addQuestion()">Add Question</button>
                                                 <button type="button" class="btn btn-success" onclick="saveTest()">Save Test</button>
-                                            </form>
                                         </div>
-                                    </div>
+                                     
                         
                                     <!-- Questions Table -->
                                     <div class="card mt-4">
@@ -231,7 +250,7 @@
                                         </div>
                                     </div>
                                 </div>
-                        
+                            </div>
                                 <!-- Session Details Tab -->
                                 <div class="tab-pane fade" id="sessionDetails" role="tabpanel" aria-labelledby="sessionDetails-tab">
                                     <div class="card">
@@ -258,6 +277,65 @@
                                 </div>
                             </div>
                         </div>
+                    
+                        <div class="container mt-5" style="display: none;" id="viewForm">
+                            <h2 class="mb-4">View Results</h2>
+                        
+                            <!-- Session Selection -->
+                            <div class="form-group">
+                                <label for="viewSessionSelect">Select Session:</label>
+                                <% if (typeof session !== 'undefined' && session.length > 0) { %>
+                                    <select class="form-control" id="viewSessionSelect" required>
+                                        <% for (s of session) { %>
+                                            <option value="<%= s._id %>"><%= s.sessionName %></option>
+                                        <% } %>
+                                    </select>
+                                <% } else { %>
+                                    Session not Found
+                                <% } %>
+                            </div>
+                        
+                            <!-- Fetch Button -->
+                            <button class="btn btn-primary" id="fetchDataBtn" onclick="fetchData()">Fetch Data</button>
+                        
+                            <!-- Test Selection within the Session -->
+                            <div class="form-group mt-3">
+                                <label for="viewTestSelect">Select Test:</label>
+                                <select class="form-control" id="viewTestSelect" required>
+                                    <!-- Options for tests will be dynamically populated based on the selected session -->
+                                </select>
+                            </div>
+                        
+                            <!-- Participant Data -->
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    Participant Data
+                                </div>
+                                <div class="card-body">
+                                    <!-- Display participant data here for the selected test -->
+                                </div>
+                            </div>
+                        
+                            <!-- Top Scorers -->
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    Top Scorers
+                                </div>
+                                <div class="card-body">
+                                    <!-- Display top scorers here for the selected test -->
+                                </div>
+                            </div>
+                        
+                            <!-- Average Score -->
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    Average Score
+                                </div>
+                                <div class="card-body">
+                                    <!-- Display average score here for the selected test -->
+                                </div>
+                            </div>
+                        </div>                       
                     <% } %>
                 </main>
                 

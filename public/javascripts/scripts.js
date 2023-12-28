@@ -82,7 +82,9 @@ function addStudent(selfMail) {
     }
 
     // Check if the student email is already in the list
-    var participantList = document.getElementById("participantInputs").getElementsByTagName("input");
+    var participantList = document
+        .getElementById("participantInputs")
+        .getElementsByTagName("input");
     for (var i = 0; i < participantList.length; i++) {
         if (participantList[i].value === studentEmail) {
             alert("Student email already added to the list.");
@@ -93,19 +95,21 @@ function addStudent(selfMail) {
     // Add the student email input box to the list
     var participantInputs = document.getElementById("participantInputs");
     var newInput = document.createElement("input");
-    newInput.type = "email";  // Change the input type to email
+    newInput.type = "email"; // Change the input type to email
     newInput.value = studentEmail;
     newInput.name = "email";
     newInput.readOnly = true;
     participantInputs.appendChild(newInput);
 
-    document.getElementById('sessionName').value = sName;
+    document.getElementById("sessionName").value = sName;
 
     studentEmailInput.value = "";
 }
 
 function createSession() {
-    var participantList = document.getElementById("participantInputs").getElementsByTagName("input");
+    var participantList = document
+        .getElementById("participantInputs")
+        .getElementsByTagName("input");
 
     if (participantList.length === 0) {
         alert("Please add at least one student email.");
@@ -115,42 +119,112 @@ function createSession() {
     document.getElementById("createSessionForm").submit();
 }
 
-
 var sessions = ["Session 1", "Session 2"];
-    var sessionSelect = document.getElementById("sessionSelect");
-    sessions.forEach(function (session) {
-        var option = document.createElement("option");
-        option.value = session;
-        option.text = session;
-        sessionSelect.appendChild(option);
+var sessionSelect = document.getElementById("sessionSelect");
+sessions.forEach(function (session) {
+    var option = document.createElement("option");
+    option.value = session;
+    option.text = session;
+    sessionSelect.appendChild(option);
+});
+
+var questions = [];
+
+function addQuestion() {
+    // Initialize questions array if undefined
+    if (typeof questions === 'undefined') {
+        questions = [];
+    }
+
+    var questionText = document.getElementById("question").value;
+    var optionsText = document.getElementById("options").value;
+    var correctAnswer = document.getElementById("correctAnswer").value;
+
+    // Validate options
+    var options = optionsText.split(",").map(function (option) {
+        return option.trim();
     });
 
-    function addQuestion() {
-        var questionText = prompt("Enter the question:");
-        var optionsText = prompt("Enter options separated by commas (e.g., Option 1, Option 2, Option 3):");
-        var options = optionsText.split(",").map(function (option) {
-            return option.trim();
-        });
-        var answer = prompt("Enter the correct answer:");
-
-        // Create a table row for the question
-        var tableBody = document.getElementById("questionsTableBody");
-        var newRow = tableBody.insertRow(tableBody.rows.length);
-
-        // Question
-        var questionCell = newRow.insertCell(0);
-        questionCell.innerText = questionText;
-
-        // Options
-        var optionsCell = newRow.insertCell(1);
-        optionsCell.innerText = options.join(", ");
-
-        // Answer
-        var answerCell = newRow.insertCell(2);
-        answerCell.innerText = answer;
+    if (options.length !== 4) {
+        alert("Please provide exactly four options.");
+        return;
     }
 
-    function saveTest() {
-        // Add logic to save the test data
-        console.log("Saving test...");
+    // Create a table row for the question
+    var tableBody = document.getElementById("questionsTableBody");
+    var newRow = tableBody.insertRow(tableBody.rows.length);
+
+    // Question
+    var questionCell = newRow.insertCell(0);
+    questionCell.innerText = questionText;
+
+    // Options
+    var optionsCell = newRow.insertCell(1);
+    optionsCell.innerText = options.join(", ");
+
+    // Answer
+    var answerCell = newRow.insertCell(2);
+    answerCell.innerText = correctAnswer;
+
+    questions.push({
+        "question": questionText,
+        "options": options,
+        "answer": correctAnswer
+    });
+
+    document.getElementById("question").value = "";
+    document.getElementById("options").value = "";
+    document.getElementById("correctAnswer").value = "";
+}
+
+
+function saveTest() {
+    const sessionID = document.getElementById("sessionSelect").value;
+    const subjectName = document.getElementById("testName").value;
+    if (!subjectName) {
+        alert("Please enter a test name.");
+        document.getElementById("testName").focus();
+        return;
     }
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+        alert("Please provide at least one question.");
+        return;
+    }
+
+    fetch("http://localhost:3000/users/addTest", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ "questions": questions, "sessionId" : sessionID, "subjectName":subjectName }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+        } else {
+            console.error("Missing redirect URL in the response data.");
+        }
+    })
+    .catch((error) => console.error("Error:", error));
+}
+
+function fetchData() {
+    var selectedSession = document.getElementById('viewSessionSelect').value;
+
+    fetch(`/api/fetch-tests?session=${selectedSession}`)
+        .then(response => response.json())
+        .then(tests => {
+            // Populate the test dropdown with fetched tests
+            var testSelect = document.getElementById('viewTestSelect');
+            testSelect.innerHTML = '';
+            tests.forEach(test => {
+                var option = document.createElement('option');
+                option.value = test._id;
+                option.textContent = test.testName;
+                testSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching tests:', error));
+}

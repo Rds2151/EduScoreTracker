@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const flash = require("connect-flash");
-const { register, createSession, fetchAllSession } = require("../controllers/userController");
+const { register, createSession, fetchAllSession, addTest } = require("../controllers/userController");
 const passport = require("passport");
 
 router.use(flash())
@@ -52,20 +52,17 @@ router.get("/dashboard", async (req, res, next) => {
             
             res.render("index", { "user": user, "session": sessionDetail.session });
         } else {
-            // Additional logic for handling userType other than "teacher"
-            // Uncomment the following code block if needed
-            /*
-            let fetchData = await fetchAllStocks();
-            if (!fetchData.hasError) {
-                items = fetchData.result;
-                let data = req.flash();
-                if (data.message) {
-                    return res.render("index", { "user": user, "items": items, "messages": data.message });
-                }
-            } else {
-                throw fetchData;
-            }
-            */
+            // let fetchData = await fetchAllStocks();
+            // if (!fetchData.hasError) {
+            //     items = fetchData.result;
+            //     let data = req.flash();
+            //     if (data.message) {
+            //         return res.render("index", { "user": user, "items": items, "messages": data.message });
+            //     }
+            // } else {
+            //     throw fetchData;
+            // }
+            res.render("index", { "user" : user })
         }
     } catch (error) {
         res.render("index", { "user": user, "messages": [error.message, true] });
@@ -118,6 +115,22 @@ router.post("/createSession", async (req, res, next) => {
         res.redirect("/users/dashboard");
     }
 });
+
+router.post("/addTest", async (req, res, next) => {
+    console.log(req.body)
+    const sessionId = req.body.sessionId
+    const subjectName = req.body.subjectName
+    const questions = req.body.questions
+
+    try {
+		const data = await addTest(questions, sessionId, subjectName );
+		req.flash("messages",data.message)
+		res.send({redirectUrl:"/users/dashboard"})
+	} catch (error) {
+		req.flash("message",error.message)
+		res.send({redirectUrl:"/users/dashboard"})
+	}
+})
 
 router.use((req,res,next) => {
 	res.redirect("/404")

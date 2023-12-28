@@ -13,20 +13,7 @@ const teacherSchema = new mongoose.Schema({
     Password: {
         type: String,
         required: true,
-    },
-    // testScores: [
-    //     {
-    //         subjectCode: "string",
-    //         score: "number",
-    //         testDate: "date",
-    //     },
-    // ],
-    // grades: [
-    //     {
-    //         subjectCode: "string",
-    //         grade: "string",
-    //     },
-    // ],
+    }
 });
 
 const studentSchema = new mongoose.Schema({
@@ -42,20 +29,7 @@ const studentSchema = new mongoose.Schema({
     Password: {
         type: String,
         required: true,
-    },
-    // testScores: [
-    //     {
-    //         subjectCode: "string",
-    //         score: "number",
-    //         testDate: "date",
-    //     },
-    // ],
-    // grades: [
-    //     {
-    //         subjectCode: "string",
-    //         grade: "string",
-    //     },
-    // ],
+    }
 });
 
 const testSchema = new mongoose.Schema({
@@ -76,8 +50,14 @@ const testSchema = new mongoose.Schema({
                 option3: { type: String, required: true },
                 option4: { type: String, required: true },
             },
-            testDate: { type: Date, required: true },
+            answer: { type: String, required: true },
         },
+    ],
+    scores: [
+        {
+            studentId: { type: mongoose.Schema.ObjectId, ref: 'Student', required: true },
+            score: { type: Number, required: true },
+        }
     ],
 });
 

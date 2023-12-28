@@ -92,3 +92,14 @@ exports.fetchAllSession = async (id) => {
         throw { error: `Unexpected error: ${err.message}`, hasError: true };
     }
 };
+
+
+exports.addTest = async (questions, sessionId, subjectName) => {
+    try {        
+        const result = await sobj.createTest(questions, sessionId, subjectName);
+        return { message: result.message };
+    } catch (err) {
+        console.error("Unexpected error during account creation:", err);
+        throw { message: "Failed to tranfer ingredient." };
+    }
+}

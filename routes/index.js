@@ -13,4 +13,9 @@ router.get('/test', function(req, res, next) {
   res.render("charts");
 });
 
+router.get('/api/fetch-data', function(req, res, next) {
+  const sessionid = req.query.session
+  res.send("ok");
+});
+
 module.exports = router;
