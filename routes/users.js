@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const flash = require("connect-flash");
-const { register } = require("../controllers/userController");
+const { register, createSession, fetchAllSession } = require("../controllers/userController");
 const passport = require("passport");
 
 router.use(flash())
@@ -30,10 +30,46 @@ router.get("/login", (req, res, next) => {
     res.render("login", {"messages" : result});
 });
 
+router.get("/dashboard", async (req, res, next) => {
+    const user = req.user;
 
-router.get("/dashboard", (req, res, next) => {
-	const user = req.user;
-    res.render("index", { "user": user });
+    if (!user || Object.keys(user).length === 0) {
+        return res.redirect("/");
+    }
+
+    try {
+        if (user.userType == "teacher") {
+            const sessionDetail = await fetchAllSession(user._id);
+
+            if (!sessionDetail.hasError) {
+                let data = req.flash();
+                if (data.messages) {
+                    return res.render("index", { "user": user, "session": sessionDetail.session, "messages": data.messages });
+                }
+            } else {
+                throw sessionDetail;
+            }
+            
+            res.render("index", { "user": user, "session": sessionDetail.session });
+        } else {
+            // Additional logic for handling userType other than "teacher"
+            // Uncomment the following code block if needed
+            /*
+            let fetchData = await fetchAllStocks();
+            if (!fetchData.hasError) {
+                items = fetchData.result;
+                let data = req.flash();
+                if (data.message) {
+                    return res.render("index", { "user": user, "items": items, "messages": data.message });
+                }
+            } else {
+                throw fetchData;
+            }
+            */
+        }
+    } catch (error) {
+        res.render("index", { "user": user, "messages": [error.message, true] });
+    }
 });
 
 router.post("/register", async (req, res, next) => {
@@ -67,10 +103,21 @@ router.get("/logout", (req,res,next) => {
 	})
 })
 
-router.post("/createSession", (req, res, next) => {
-    console.log(req.body)
-    res.redirect("dashboard")
-})
+router.post("/createSession", async (req, res, next) => {
+    const user = req.user;
+    const emails = Array.isArray(req.body.email) ? req.body.email : [req.body.email];
+    const sessionName = req.body.sessionName;
+
+    const sessionCreationResult = await createSession(emails, sessionName, user._id);
+
+    if (sessionCreationResult.hasError) {
+        req.flash("messages", [sessionCreationResult.error, true]);
+        res.redirect("/users/dashboard");
+    } else {
+        req.flash("messages", [sessionCreationResult.message, false]);
+        res.redirect("/users/dashboard");
+    }
+});
 
 router.use((req,res,next) => {
 	res.redirect("/404")

@@ -7,6 +7,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>Dashboard</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="/stylesheets/styles.css" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -113,144 +114,153 @@
             </div>
             <div id="layoutSidenav_content">
                 <main>
-                    <div id="sessionForm" style="display: block;">
-                        <div id="createSessionContent" class="container-fluid px-4">
-                            <h1 class="mt-4"></h1>
-                            <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item active"></li>
-                            </ol>
-                            <div id="createSessionContent">
-                                <div id="sessionForm">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="card mb-4">
-                                                <div class="card-header">
-                                                    <i class="fas fa-plus-circle me-1"></i>
-                                                    Create Session
+                    <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+                        <div align="center" class="alert <%= messages[1] ? 'alert-danger' : 'alert-success' %>">
+                            <%= messages[0] %>
+                        </div>
+                    <% } %>
+                
+                    <% if (user.userType === "teacher") {%>
+                        <div id="sessionForm" style="display: none;">
+                            <div class="container mt-5">
+                                <h1 class="mt-4"></h1>
+                                <ol class="breadcrumb mb-4">
+                                    <li class="breadcrumb-item active"></li>
+                                </ol>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <i class="fas fa-plus-circle me-1"></i>
+                                                Create Session
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label for="sessionName" class="form-label">Session Name:</label>
+                                                    <input type="text" class="form-control" id="sessionNameInput" required>
                                                 </div>
-                                                <div class="card-body">
-                                                    <div class="mb-3">
-                                                        <label for="studentEmail" class="form-label">Student Email:</label>
-                                                        <input type="email" class="form-control" id="studentEmail" required>
-                                                    </div>
-                                                    <button type="button" class="btn btn-primary" onclick="addStudent('<%= user.Email %>')">Add Student</button>
-                                                    <button type="button" class="btn btn-success" onclick="createSession()">Create Session</button>
+                                                <div class="mb-3">
+                                                    <label for="studentEmail" class="form-label">Student Email:</label>
+                                                    <input type="email" class="form-control" id="studentEmail" required>
                                                 </div>
+                                                <button type="button" class="btn btn-primary" onclick="addStudent('<%= user.Email %>')">Add Student</button>
+                                                <button type="button" class="btn btn-success" onclick="createSession()">Create Session</button>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Student Names Input Boxes -->
-                                    <div class="card mb-4">
+                                </div>
+                                <!-- Student Names Input Boxes -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-table me-1"></i>
+                                        Session Participants
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="createSessionForm" action="/users/createSession" method="post">
+                                            <input type="text" id="sessionName" name="sessionName" value="" hidden>
+                                            <div id="participantInputs">
+                                                <!-- Student email input boxes will be dynamically added here -->
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="container mt-5" id="mainForm">
+                            <ul class="nav nav-tabs" id="testTabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="createTest-tab" data-toggle="tab" href="#createTest" role="tab" aria-controls="createTest" aria-selected="true">Create Test</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="sessionDetails-tab" data-toggle="tab" href="#sessionDetails" role="tab" aria-controls="sessionDetails" aria-selected="false">Session Details</a>
+                                </li>
+                            </ul>
+                        
+                            <div class="tab-content mt-2">
+                                <!-- Create Test Tab -->
+                                <div class="tab-pane fade show active" id="createTest" role="tabpanel" aria-labelledby="createTest-tab">
+                                    <div class="card">
                                         <div class="card-header">
-                                            <i class="fas fa-table me-1"></i>
-                                            Session Participants
+                                            Create Test
                                         </div>
                                         <div class="card-body">
-                                            <form id="createSessionForm" action="/users/createSession" method="post" onsubmit="validateSession(event)">
-                                                <div id="participantInputs">
+                                            <!-- Your test creation form goes here -->
+                                            <form id="testForm">
+                                                <div class="form-group">
+                                                    <label for="sessionSelect">Select Session:</label>
+                                                    <% if (typeof session !== 'undefined' && session.length > 0) {%>
+                                                        <select class="form-control" id="sessionSelect">
+                                                            <% for (s of session) { %>
+                                                                <option value="<%= s._id %>"><%= s.sessionName %></option>
+                                                            <% } %>
+                                                        </select>
+                                                    <% } else { %>
+                                                        Session not Found
+                                                    <% } %>
                                                 </div>
+                                                
+                                                <div class="form-group">
+                                                    <label for="testName">Test Name:</label>
+                                                    <input type="text" class="form-control" id="testName" placeholder="Enter test name">
+                                                </div>
+                                                <button type="button" class="btn btn-primary" onclick="addQuestion()">Add Question</button>
+                                                <button type="button" class="btn btn-success" onclick="saveTest()">Save Test</button>
                                             </form>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                    </div>
-                    <div class="container-fluid px-4" id="mainForm" style="display: none;">
-                        <h1 class="mt-4">Dashboard</h1>
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Dashboard</li>
-                        </ol>
-                        <div class="row">
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-primary text-white mb-4">
-                                    <div class="card-body">Primary Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        
+                                    <!-- Questions Table -->
+                                    <div class="card mt-4">
+                                        <div class="card-header">
+                                            Questions
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Question</th>
+                                                        <th>Options</th>
+                                                        <th>Answer</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="questionsTableBody">
+                                                    <!-- Questions will be dynamically added here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-warning text-white mb-4">
-                                    <div class="card-body">Warning Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-success text-white mb-4">
-                                    <div class="card-body">Success Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-danger text-white mb-4">
-                                    <div class="card-body">Danger Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        
+                                <!-- Session Details Tab -->
+                                <div class="tab-pane fade" id="sessionDetails" role="tabpanel" aria-labelledby="sessionDetails-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Session Details
+                                        </div>
+                                        <div class="card-body">
+                                            <ul id="sessionList" class="list-group">
+                                              <% if (session && session.length > 0) { %>
+                                                <% for (const s of session) { %>
+                                                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span><%= `${s.sessionName} - ${s.studentData.map(student => student.Email).join(', ')}` %></span>
+                                                    <div class="btn-group" role="group">
+                                                      <button class="btn btn-danger btn-sm" onclick="deleteSession('<%= s._id %>')">Delete</button>
+                                                    </div>
+                                                  </li>
+                                                <% } %>
+                                              <% } else { %>
+                                                <li class="list-group-item">No sessions available</li>
+                                              <% } %>
+                                            </ul>
+                                        </div>                                       
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-area me-1"></i>
-                                        Area Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-bar me-1"></i>
-                                        Bar Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fas fa-table me-1"></i>
-                                DataTable Example
-                            </div>
-                            <div class="card-body">
-                                <table id="datatablesSimple">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Tiger Nixon</td>
-                                            <td>System Architect</td>
-                                            <td>Edinburgh</td>
-                                            <td>61</td>
-                                            <td>2011/04/25</td>
-                                            <td>$320,800</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                    <% } %>
                 </main>
+                
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
@@ -265,6 +275,9 @@
                 </footer>
             </div>
         </div>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src="/javascripts/scripts.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>

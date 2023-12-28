@@ -69,25 +69,11 @@ function showForm(formId) {
     document.getElementById(formId).style.display = "block";
 }
 
-function validateSession(event) {
-    event.preventDefault();
-
-    // Ensure that the list is not empty before submitting
-    var participantList = document.getElementById("participantInputs").getElementsByTagName("input");
-    if (participantList.length === 0) {
-        alert("Please add at least one student before creating the session.");
-        return;
-    }
-
-    // Add any additional validation logic here if needed
-
-    // Submit the form
-    document.getElementById("createSessionForm").submit();
-}
-
 function addStudent(selfMail) {
     var studentEmailInput = document.getElementById("studentEmail");
+    var sessionNameInput = document.getElementById("sessionNameInput");
     var studentEmail = studentEmailInput.value.trim();
+    var sName = sessionNameInput.value.trim();
 
     // Validate and ensure the input is not empty
     if (studentEmail === "" || studentEmail === selfMail) {
@@ -113,50 +99,58 @@ function addStudent(selfMail) {
     newInput.readOnly = true;
     participantInputs.appendChild(newInput);
 
-    // Clear the input field
+    document.getElementById('sessionName').value = sName;
+
     studentEmailInput.value = "";
 }
 
 function createSession() {
-    // Trigger the form submission
+    var participantList = document.getElementById("participantInputs").getElementsByTagName("input");
+
+    if (participantList.length === 0) {
+        alert("Please add at least one student email.");
+        return;
+    }
+
     document.getElementById("createSessionForm").submit();
 }
 
-// function createSession() {
-//     var studentEmail = document.getElementById("studentEmail").value;
 
-//     if (!studentEmail || !isValidEmail(studentEmail)) {
-//         alert("Please enter a valid student email.");
-//         return;
-//     }
+var sessions = ["Session 1", "Session 2"];
+    var sessionSelect = document.getElementById("sessionSelect");
+    sessions.forEach(function (session) {
+        var option = document.createElement("option");
+        option.value = session;
+        option.text = session;
+        sessionSelect.appendChild(option);
+    });
 
-//     // Append the student name to the table
-//     var tableBody = document
-//         .getElementById("sessionParticipants")
-//         .getElementsByTagName("tbody")[0];
-//     var newRow = tableBody.insertRow(tableBody.rows.length);
-//     var cell = newRow.insertCell(0);
-//     cell.innerHTML = studentEmail;
-// }
+    function addQuestion() {
+        var questionText = prompt("Enter the question:");
+        var optionsText = prompt("Enter options separated by commas (e.g., Option 1, Option 2, Option 3):");
+        var options = optionsText.split(",").map(function (option) {
+            return option.trim();
+        });
+        var answer = prompt("Enter the correct answer:");
 
-// function addStudent() {
-//     var studentEmail = document.getElementById("studentEmail").value;
-//     var tableBody = document.getElementById("sessionParticipants").getElementsByTagName('tbody')[0];
-//     var newRow = tableBody.insertRow(tableBody.rows.length);
-//     var cell = newRow.insertCell(0);
-//     cell.innerHTML = studentEmail;
-// }
+        // Create a table row for the question
+        var tableBody = document.getElementById("questionsTableBody");
+        var newRow = tableBody.insertRow(tableBody.rows.length);
 
-// // Basic email validation function
-// function isValidEmail(email) {
-//     var emailRegex = /\S+@\S+\.\S+/;
-//     return emailRegex.test(email);
-// }
+        // Question
+        var questionCell = newRow.insertCell(0);
+        questionCell.innerText = questionText;
 
-// function validateSession() {
-//     var table = document.getElementById("sessionParticipants");
-//     if (table.rows.length === 0) {
-//         alert("Please add at least one student to the session.");
-//         return false;
-//     }
-// }
+        // Options
+        var optionsCell = newRow.insertCell(1);
+        optionsCell.innerText = options.join(", ");
+
+        // Answer
+        var answerCell = newRow.insertCell(2);
+        answerCell.innerText = answer;
+    }
+
+    function saveTest() {
+        // Add logic to save the test data
+        console.log("Saving test...");
+    }

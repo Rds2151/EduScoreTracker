@@ -44,7 +44,18 @@ class Server
             console.error(error.message);
             throw new Error('Error checking email presence');
         }
-    }   
+    }
+
+    getTeacherById = async (id) => {
+        try {
+            const teacher = await Teacher.findOne({ _id: id })
+            if (teacher !== null) return teacher;
+        } catch (error) {
+            console.error(error.message);
+            throw new Error('Error checking email presence');
+        }
+        return null;
+    }
 
     getStudentMail = async (email) => {
         try {
@@ -100,20 +111,30 @@ class Server
         }
     };
 
-    addStudent = async (user,itemName,quantity) => {
+    createSession = async (studentsId,sname, teacherId) => {
         try {
-            const storage = new Storage({
-                RestaurantId: user._id,
-                ingredientName:itemName,
-                ingredientNo:quantity
-            })
-
-            const savedIngredient = await storage.save();
-            return savedIngredient;
+            const session = new Session({
+                teacherId: teacherId,
+                sessionName: sname,
+                studentData: studentsId,
+            });
+    
+            const savedSession = await session.save();
+            return savedSession;
         } catch (error) {
             throw error;
         }
     }
+    
+    fetchAllSession = async (id) => {
+        try {
+            const session = await Session.find({ teacherId: id })
+                .populate('studentData');
+            return session;
+        } catch (error) {
+            throw error;
+        }
+    };    
 }
 
 module.exports = Server;

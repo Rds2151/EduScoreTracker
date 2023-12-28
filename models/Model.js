@@ -82,19 +82,18 @@ const testSchema = new mongoose.Schema({
 });
 
 const sessionSchema = new mongoose.Schema({
-    subject: { 
-        type: String, 
-        required: true 
-    },
     teacherId: { 
         type: mongoose.Schema.ObjectId, 
         required: true 
     },
-    students: [{ 
-        studentMail: {
-            type: String, 
-            required: true 
-        } 
+    sessionName: { 
+        type: String, 
+        required: true
+    },
+    studentData: [{
+        type: mongoose.Schema.ObjectId,
+        ref: 'Student',
+        required: true 
     }],
 });
 

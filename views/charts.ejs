@@ -1,91 +1,16 @@
-<div id="createSessionContent">
-  <div id="sessionForm">
-      <div class="row">
-          <div class="col-md-6">
-              <div class="card mb-4">
-                  <div class="card-header">
-                      <i class="fas fa-plus-circle me-1"></i>
-                      Create Session
-                  </div>
-                  <div class="card-body">
-                      <div class="mb-3">
-                          <label for="studentEmail" class="form-label">Student Email:</label>
-                          <input type="email" class="form-control" id="studentEmail" required>
-                      </div>
-                      <button type="button" class="btn btn-primary" onclick="addStudent()">Add Student</button>
-                      <button type="button" class="btn btn-success" onclick="createSession()">Create Session</button>
-                  </div>
-              </div>
-          </div>
-      </div>
-      <!-- Student Names Input Boxes -->
-      <div class="card mb-4">
-          <div class="card-header">
-              <i class="fas fa-table me-1"></i>
-              Session Participants
-          </div>
-          <div class="card-body">
-              <form id="createSessionForm" action="/users/createSession" method="post" onsubmit="validateSession(event)">
-                  <div id="participantInputs">
-                  </div>
-              </form>
-          </div>
-      </div>
-  </div>
-</div>
+<% if (typeof session !== 'undefined' && session.length > 0) {%>
+  <% for (s of session) { %>
+      <li><%= s.sessionName %></li>
+  <% } %>
+<% } %>
 
-<script>
-  function validateSession(event) {
-      event.preventDefault();
 
-      // Ensure that the list is not empty before submitting
-      var participantList = document.getElementById("participantInputs").getElementsByTagName("input");
-      if (participantList.length === 0) {
-          alert("Please add at least one student before creating the session.");
-          return;
-      }
-
-      // Add any additional validation logic here if needed
-
-      // Submit the form
-      document.getElementById("createSessionForm").submit();
-  }
-
-  function addStudent() {
-      alert("ho")
-      var studentEmailInput = document.getElementById("studentEmail");
-      var studentEmail = studentEmailInput.value.trim();
-
-      // Validate and ensure the input is not empty
-      if (studentEmail === "") {
-          alert("Please enter a valid student email.");
-          return;
-      }
-
-      // Check if the student email is already in the list
-      var participantList = document.getElementById("participantInputs").getElementsByTagName("input");
-      for (var i = 0; i < participantList.length; i++) {
-          if (participantList[i].value === studentEmail) {
-              alert("Student email already added to the list.");
-              return;
-          }
-      }
-
-      // Add the student email input box to the list
-      var participantInputs = document.getElementById("participantInputs");
-      var newInput = document.createElement("input");
-      newInput.type = "email";  // Change the input type to email
-      newInput.value = studentEmail;
-      newInput.name = "1";
-      newInput.readOnly = true;
-      participantInputs.appendChild(newInput);
-
-      // Clear the input field
-      studentEmailInput.value = "";
-  }
-
-  function createSession() {
-      // Trigger the form submission
-      document.getElementById("createSessionForm").submit();
-  }
-</script>
+<% if (typeof session !== 'undefined' && session.length > 0) {%>
+  <select class="form-control" id="sessionSelect">
+      <% for (s of session) { %>
+          <option value="<%= s._id %>"><%= s.sessionName</option>
+      <% } %>
+  </select>
+  <% } else { %>
+      Data not Found
+  <% } %>
