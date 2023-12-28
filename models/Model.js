@@ -29,7 +29,14 @@ const studentSchema = new mongoose.Schema({
     Password: {
         type: String,
         required: true,
-    }
+    },
+    sessionIds: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'Session',
+            required: true,
+        },
+    ],
 });
 
 const testSchema = new mongoose.Schema({

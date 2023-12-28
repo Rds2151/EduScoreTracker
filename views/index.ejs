@@ -58,10 +58,10 @@
                                 <nav class="sb-sidenav-menu-nested nav">
                                     <% if ( user.userType === 'teacher' ) { %>
                                         <a class="nav-link" onclick="showForm('sessionForm')">Create Session</a>
+                                        <% } else { %>
+                                            <!-- <a class="nav-link" href="">View Result</a> -->
+                                        <% } %>
                                         <a class="nav-link" onclick="showForm('viewForm')">View Result</a>
-                                    <% } else { %>
-                                        <a class="nav-link" href="">View Result</a>
-                                    <% } %>
                                 </nav>
                             </div>
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
@@ -217,10 +217,10 @@
                                                 <div class="form-group">
                                                     <label for="correctAnswer">Correct Answer:</label>
                                                     <select class="form-control" id="correctAnswer">
-                                                        <option value="Option 1">Option 1</option>
-                                                        <option value="Option 2">Option 2</option>
-                                                        <option value="Option 3">Option 3</option>
-                                                        <option value="Option 4">Option 4</option>
+                                                        <option value="option1">Option 1</option>
+                                                        <option value="option2">Option 2</option>
+                                                        <option value="option3">Option 3</option>
+                                                        <option value="option4">Option 4</option>
                                                     </select>
                                                 </div>
                                 
@@ -296,23 +296,36 @@
                             </div>
                         
                             <!-- Fetch Button -->
-                            <button class="btn btn-primary" id="fetchDataBtn" onclick="fetchData()">Fetch Data</button>
-                        
-                            <!-- Test Selection within the Session -->
-                            <div class="form-group mt-3">
-                                <label for="viewTestSelect">Select Test:</label>
-                                <select class="form-control" id="viewTestSelect" required>
-                                    <!-- Options for tests will be dynamically populated based on the selected session -->
-                                </select>
-                            </div>
-                        
-                            <!-- Participant Data -->
+                            <!-- <button class="btn btn-primary" id="fetchDataBtn" onclick="fetchData()">Fetch Data</button> -->
+                                 
                             <div class="card mt-4">
                                 <div class="card-header">
-                                    Participant Data
+                                    Subject
                                 </div>
                                 <div class="card-body">
-                                    <!-- Display participant data here for the selected test -->
+                                    <% if (typeof testsData !== 'undefined' && testsData.length > 0) { %>
+                                        <%= testsData[0].topTwoScores[0].subject %>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    Participant Name
+                                </div>
+                                <div class="card-body">
+                                    <% if (typeof testsData !== 'undefined' && testsData.length > 0) { %>
+                                        <% for (test of testsData) { %>  
+                                          <% if (test.topTwoScores && test.topTwoScores.length > 0) { %>
+                                            <% for (let i = 0; i < test.topTwoScores.length; i++) { %>
+                                              <%= test.topTwoScores[i].student.fname +" "+ test.topTwoScores[i].student.lname %>
+                                              <br>
+                                            <% } %>
+                                          <% } else { %>
+                                            No top scores available for this test.
+                                          <% } %>
+                                        <% } %>
+                                      <% } %>
                                 </div>
                             </div>
                         
@@ -323,6 +336,19 @@
                                 </div>
                                 <div class="card-body">
                                     <!-- Display top scorers here for the selected test -->
+                                    <% if (typeof testsData !== 'undefined' && testsData.length > 0) { %>
+                                        <% for (test of testsData) { %>  
+                                          <% if (test.topTwoScores && test.topTwoScores.length > 0) { %>
+                                            <% for (let i = 0; i < test.topTwoScores.length; i++) { %>
+                                              <%= test.topTwoScores[i].student.fname +" "+ test.topTwoScores[i].student.lname +" - "+test.topTwoScores[i].Score %>
+                                              <br>
+                                            <% } %>
+                                          <% } else { %>
+                                            No top scores available for this test.
+                                          <% } %>
+                                        <% } %>
+                                    <% } %>
+                                      
                                 </div>
                             </div>
                         
@@ -332,10 +358,84 @@
                                     Average Score
                                 </div>
                                 <div class="card-body">
-                                    <!-- Display average score here for the selected test -->
+                                    <% if (typeof testsData !== 'undefined' && testsData.length > 0) { %>
+                                        <%= testsData[0].averageScore %>
+                                    <% } %>
                                 </div>
                             </div>
                         </div>                       
+                    <% } else { %>
+                        <div class="container mt-5" id="mainForm">
+                            <h2>Select Test</h2>
+                            
+                            <div class="mb-3">
+                                <label for="testSelect" class="form-label">Choose a Test:</label>
+                                <% if (typeof tests !== 'undefined' && tests.length > 0) { %>
+                                    <select class="form-control" id="testSelect" name="testSelect" onchange="toggleQuestions(this.value)">
+                                        <option value="0">Select Test</option>
+                                        <% for (test of tests) { %>
+                                            <option value="<%= test._id %>"><%= test.subject %></option>
+                                        <% } %>
+                                    </select>
+                                <% } else { %>
+                                    <p class="text-danger">Test Not Found</p>
+                                <% } %>
+                            </div>
+                        
+                            <!-- Your EJS Template -->
+                            <% if (typeof tests !== 'undefined' && tests.length > 0) { %>
+                            <form id="questionsForm" action="/users/submitTest" method="post" style="display: none;">
+                                <input type="text" id="testId" name="testId" value="" hidden>
+                                <% for (test of tests) { %>
+                                    <% for (let i = 0; i < test.questions.length; i++) { %>
+                                        <div id="question<%= i + 1 %>-test1" class="question mt-4">
+                                            <h4>Question <%= i + 1 %>:</h4>
+                                            <p><%= test.questions[i].question %></p>
+
+                                            <% for (let j = 0; j < Object.keys(test.questions[i].options).length; j++) { %>
+                                                <div class="form-check">
+                                                    <input type="radio" name="q<%= i + 1 %>" class="form-check-input" value="<%= Object.keys(test.questions[i].options)[j] %>">
+                                                    <label class="form-check-label"> <%= Object.values(test.questions[i].options)[j] %> </label>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <button type="submit" class="btn btn-primary mt-3">Submit Test</button>
+                                <% } %>
+                            </form>
+                            <% } %>
+                                                
+                            <% if (typeof tests !== 'undefined' && tests.length === 0) { %>
+                                <p class="text-danger mt-3">No Tests Available</p>
+                            <% } %>
+                        </div>
+                        
+                        <div class="container mt-5" id="viewForm" style="display: none;">
+                            <h2>Scores</h2>
+                        
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Subject Name</th>
+                                        <th scope="col">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">1</th>
+                                        <td>John Doe</td>
+                                        <td>85</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">2</th>
+                                        <td>Jane Smith</td>
+                                        <td>92</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     <% } %>
                 </main>
                 

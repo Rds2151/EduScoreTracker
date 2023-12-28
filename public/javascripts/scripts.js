@@ -132,7 +132,7 @@ var questions = [];
 
 function addQuestion() {
     // Initialize questions array if undefined
-    if (typeof questions === 'undefined') {
+    if (typeof questions === "undefined") {
         questions = [];
     }
 
@@ -167,16 +167,15 @@ function addQuestion() {
     answerCell.innerText = correctAnswer;
 
     questions.push({
-        "question": questionText,
-        "options": options,
-        "answer": correctAnswer
+        question: questionText,
+        options: options,
+        answer: correctAnswer,
     });
 
     document.getElementById("question").value = "";
     document.getElementById("options").value = "";
     document.getElementById("correctAnswer").value = "";
 }
-
 
 function saveTest() {
     const sessionID = document.getElementById("sessionSelect").value;
@@ -197,34 +196,45 @@ function saveTest() {
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ "questions": questions, "sessionId" : sessionID, "subjectName":subjectName }),
+        body: JSON.stringify({
+            questions: questions,
+            sessionId: sessionID,
+            subjectName: subjectName,
+        }),
     })
-    .then((response) => response.json())
-    .then((data) => {
-        if (data.redirectUrl) {
-            window.location.href = data.redirectUrl;
-        } else {
-            console.error("Missing redirect URL in the response data.");
-        }
-    })
-    .catch((error) => console.error("Error:", error));
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+            } else {
+                console.error("Missing redirect URL in the response data.");
+            }
+        })
+        .catch((error) => console.error("Error:", error));
 }
 
 function fetchData() {
-    var selectedSession = document.getElementById('viewSessionSelect').value;
+    var selectedSession = document.getElementById("viewSessionSelect").value;
 
     fetch(`/api/fetch-tests?session=${selectedSession}`)
-        .then(response => response.json())
-        .then(tests => {
+        .then((response) => response.json())
+        .then((tests) => {
             // Populate the test dropdown with fetched tests
-            var testSelect = document.getElementById('viewTestSelect');
-            testSelect.innerHTML = '';
-            tests.forEach(test => {
-                var option = document.createElement('option');
+            var testSelect = document.getElementById("viewTestSelect");
+            testSelect.innerHTML = "";
+            tests.forEach((test) => {
+                var option = document.createElement("option");
                 option.value = test._id;
                 option.textContent = test.testName;
                 testSelect.appendChild(option);
             });
         })
-        .catch(error => console.error('Error fetching tests:', error));
+        .catch((error) => console.error("Error fetching tests:", error));
+}
+
+function toggleQuestions(selectedTest) {
+    const form = document.getElementById('questionsForm');
+    const testIdInput = document.getElementById('testId');
+    testIdInput.value = selectedTest;
+    form.style.display = selectedTest === '0' ? 'none' : 'block';
 }

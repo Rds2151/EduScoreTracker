@@ -126,13 +126,21 @@ class Server {
 
     createSession = async (studentsId, sname, teacherId) => {
         try {
+            // Create a new session
             const session = new Session({
                 teacherId: teacherId,
                 sessionName: sname,
                 studentData: studentsId,
             });
 
+            // Save the session
             const savedSession = await session.save();
+
+            await Student.updateMany(
+                { _id: { $in: studentsId } },
+                { $push: { sessionIds: savedSession._id } }
+            );
+
             return savedSession;
         } catch (error) {
             throw error;
@@ -166,9 +174,73 @@ class Server {
                     answer: q.answer,
                 })),
             });
-    
+
             await testInstance.save();
-            return { "message": "Test Created successfully" };
+            return { message: "Test Created successfully" };
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    fetchTest = async (studentId) => {
+        try {
+            const student = await Student.findById(studentId);
+
+            if (!student) {
+                throw new Error("Student not found");
+            }
+
+            const sessionIds = student.sessionIds;
+
+            const tests = await Test.find({ sessionId: { $in: sessionIds } });
+
+            if (!tests || tests.length === 0) {
+                throw new Error("Tests not found");
+            }
+
+            return tests;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    findTopTwoScores = async (id) => {
+        try {
+            const result = await Test.aggregate([
+                { $match: { sessionId: id } },
+                { $unwind: "$scores" },
+                { $sort: { "scores.score": -1 } },
+                {
+                  $lookup: {
+                    from: 'students',
+                    localField: 'scores.studentId',
+                    foreignField: '_id',
+                    as: 'student',
+                  },
+                },
+                {
+                  $unwind: '$student',
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    subject: 1,
+                    Score: '$scores.score',
+                    student: {
+                      _id: '$student._id',
+                      fname: '$student.firstName',
+                      lname: '$student.lastName',
+                    },
+                    questions: { $ifNull: ['$questions', []] },
+                  },
+                },
+                {
+                  $addFields: {
+                    numberOfQuestions: { $size: "$questions" },
+                  },
+                },
+              ]);
+            return result;
         } catch (error) {
             throw error;
         }

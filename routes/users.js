@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const flash = require("connect-flash");
-const { register, createSession, fetchAllSession, addTest } = require("../controllers/userController");
+const { register, createSession, fetchAllSession, addTest, fetchTest, updateScore, fetchTestResult } = require("../controllers/userController");
 const passport = require("passport");
 
 router.use(flash())
@@ -40,29 +40,31 @@ router.get("/dashboard", async (req, res, next) => {
     try {
         if (user.userType == "teacher") {
             const sessionDetail = await fetchAllSession(user._id);
+            
+            const tests = await fetchTestResult(sessionDetail.session);
 
             if (!sessionDetail.hasError) {
                 let data = req.flash();
                 if (data.messages) {
-                    return res.render("index", { "user": user, "session": sessionDetail.session, "messages": data.messages });
+                    return res.render("index", { "user": user, "session": sessionDetail.session, "testsData": tests.topTwoScores, "messages": data.messages });
                 }
             } else {
                 throw sessionDetail;
             }
-            
-            res.render("index", { "user": user, "session": sessionDetail.session });
+            console.log(tests.topTwoScores)
+            res.render("index", { "user": user, "session": sessionDetail.session , "testsData": tests.topTwoScores });
         } else {
-            // let fetchData = await fetchAllStocks();
-            // if (!fetchData.hasError) {
-            //     items = fetchData.result;
-            //     let data = req.flash();
-            //     if (data.message) {
-            //         return res.render("index", { "user": user, "items": items, "messages": data.message });
-            //     }
-            // } else {
-            //     throw fetchData;
-            // }
-            res.render("index", { "user" : user })
+            let fetchData = await fetchTest(user._id);
+            
+            if (!fetchData.hasError) {
+                let data = req.flash();
+                if (data.messages) {
+                    return res.render("index", { "user": user, "tests": fetchData.testData, "messages": data.messages });
+                }
+            } else {
+                throw fetchData;
+            }
+            res.render("index", { "user" : user , "tests": fetchData.testData })
         }
     } catch (error) {
         res.render("index", { "user": user, "messages": [error.message, true] });
@@ -117,7 +119,6 @@ router.post("/createSession", async (req, res, next) => {
 });
 
 router.post("/addTest", async (req, res, next) => {
-    console.log(req.body)
     const sessionId = req.body.sessionId
     const subjectName = req.body.subjectName
     const questions = req.body.questions
@@ -127,14 +128,28 @@ router.post("/addTest", async (req, res, next) => {
 		req.flash("messages",data.message)
 		res.send({redirectUrl:"/users/dashboard"})
 	} catch (error) {
-		req.flash("message",error.message)
+		req.flash("messages",error.message)
 		res.send({redirectUrl:"/users/dashboard"})
 	}
+})
+
+router.post("/submitTest", async (req, res, next) => {
+    const testId = req.body.testId
+    const question = req.body;
+    const studentId = req.user._id;
+
+    try {
+        const testResult = await updateScore(testId,studentId,question) 
+        req.flash("messages",testResult.message)
+        res.redirect("dashboard");
+    } catch(error) {
+        req.flash("messages",error.message)
+        res.redirect("dashboard");
+    }
 })
 
 router.use((req,res,next) => {
 	res.redirect("/404")
 })
-
 
 module.exports = router;
