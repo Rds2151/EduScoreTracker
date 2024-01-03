@@ -31,7 +31,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-require("./controllers/passport-config")
+require("./auth/passport-config")
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

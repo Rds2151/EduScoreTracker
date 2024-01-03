@@ -107,10 +107,10 @@ exports.addTest = async (questions, sessionId, subjectName) => {
 exports.fetchTest = async (id) => {
     try {        
         const result = await sobj.fetchTest(id);
-        return { "testData" : result };
+        return { "testData" : result, hasError: false };
     } catch (err) {
         console.error("Unexpected error during account creation:", err);
-        throw { message: err.message };
+        throw { message: err.message , hasError: true};
     }
 }
 

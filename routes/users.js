@@ -63,6 +63,7 @@ router.get("/dashboard", async (req, res, next) => {
             } else {
                 throw fetchData;
             }
+            
             res.render("index", { "user" : user , "tests": fetchData.testData })
         }
     } catch (error) {

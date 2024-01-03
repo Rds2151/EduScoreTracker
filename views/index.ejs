@@ -404,9 +404,7 @@
                                     <button type="submit" class="btn btn-primary mt-3">Submit Test</button>
                                 <% } %>
                             </form>
-                            <% } %>
-                                                
-                            <% if (typeof tests !== 'undefined' && tests.length === 0) { %>
+                            <% } else { %>
                                 <p class="text-danger mt-3">No Tests Available</p>
                             <% } %>
                         </div>
@@ -424,14 +422,9 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <th scope="row">1</th>
-                                        <td><%= tests[0].subject %></td>
-                                        <td>3</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td><%= tests[0].subject %></td>
-                                        <td>2</td>
+                                        <th scope="row"></th>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </table>
